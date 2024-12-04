@@ -19,10 +19,8 @@ process_file() {
     local file="$1"
     local output_file="$MATCHED_FOLDER/$(basename "$file")"
 
-    # Limpiar el archivo de salida antes de agregar coincidencias
-    > "$output_file"
-
     # Usar grep para buscar las líneas que contienen los dominios
+    matches=()
     for domain in "${domains[@]}"; do
         grep -i "$domain" "$file" >> "$output_file" # Añadir las líneas encontradas al archivo de salida
     done
@@ -30,13 +28,17 @@ process_file() {
     # Si se encontraron coincidencias, mover el archivo
     if [ -s "$output_file" ]; then
         echo "Matched lines saved to $output_file"
+        # Eliminar el archivo original solo si hay coincidencias
+        rm "$file"
+        echo "Deleted $file"
     else
         echo "No matches found in $file"
+        rm "$output_file" # Eliminar archivo si no hay coincidencias
     fi
 
-    # Eliminar el archivo original después de procesarlo
+    # Eliminar el archivo original siempre, sin importar si hubo coincidencias o no
     rm "$file"
-    echo "Deleted $file"
+    echo "Deleted original file $file"
 }
 
 # Monitorear la carpeta de filtrado
